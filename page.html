@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./renderer.js"></script>
+    <script src="./geometry.js"></script>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    
+    html, body {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+<body>
+</body>
+    <script defer>
+        function setupCanvas(width = window.innerWidth, height = window.innerHeight) {
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            document.body.append(canvas);
+            return canvas;
+        }
+
+        const canvas = setupCanvas();
+        Renderer.init(canvas);
+
+        let fps = 60;
+        // cube.rotation[0] = -10;
+        // cube.rotation[2] = -50;
+
+        setInterval(() => {
+            // cube.rotation[0] += 0.5;
+            cube.rotation[1] += 1;
+            // cube.rotation[2] += 0;
+        }, 1000 / fps)
+
+        function parseObj(content) {
+            const lines = content.split('\r\n');
+
+            const geometry = {
+                vertices: [[0, 0, 0]],
+                faces: [],
+                position: [0, 0, 5],
+                rotation: [0, 0, 0],
+                scale: 1,
+            }
+
+            for(const line of lines) {
+                const line_chunks = line.split(' ');
+                const temp = [Number(line_chunks[1]), Number(line_chunks[2]), Number(line_chunks[3])];
+                
+                if(line_chunks[0] == 'v') {
+                    geometry.vertices.push(temp);
+                } else if(line_chunks[0] == 'f'){
+                    geometry.faces.push(temp);
+                }
+            }
+
+            return geometry
+        }
+
+        const loadTeapot = () => {
+            fetch('./teapot.obj')
+            .then(res => res.text())
+            .then(file => {
+                const loadableObj = parseObj(file);
+                loadableObj.rotation[0] = 180;
+                loadableObj.rotation[1] = 70;
+                loadableObj.position[1] = 1;
+
+                Renderer.scene.addObject(loadableObj)
+
+                setInterval(() => {
+                    // loadableObj.rotation[0] += 0.7;
+                    loadableObj.rotation[1] += 1.3;
+                    // loadableObj.rotation[2] += 0.2;
+                }, 1000 / fps)
+                
+                Renderer.render();
+            })
+            .catch(err => console.log(err))
+        }
+
+        // Renderer.scene.addObject(cube);
+        loadTeapot();
+        Renderer.start();
+    </script>
+</html>

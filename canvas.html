@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perspective Projection</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    html, body {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+<body>
+</body>
+<script defer>
+    // canvas setup
+    const canvas = document.createElement("canvas");
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight - 20;
+    document.body.append(canvas);
+    const c = canvas.getContext("2d");
+
+    // 3d cube data, local space
+    const cube = {
+        vertices: [
+            [-1, 1, -1],
+            [-1, -1, -1],
+            [1, 1, -1],
+            [1, -1, -1],
+            [-1, 1, 1],
+            [-1, -1, 1],
+            [1, 1, 1],
+            [1, -1, 1]
+        ],
+        faces: [
+            [0, 1, 3, 2, 0], // front face
+            [4, 5, 7, 6, 4], // back face
+            [0, 2, 6, 4, 0], // top face
+            [1, 3, 7, 5, 1], // bottom face
+            [0, 1, 5, 4, 0], // left face
+            [2, 3, 7, 6, 2], // right face
+        ],
+        position: [0, 0, 0],
+        scale: 1,
+    }
+
+    // utility
+    const degreeToRadian = (angle) => (angle / 180) * Math.PI;
+
+    // space setup
+    let w = canvas.width,
+        h = canvas.height,
+        znear = 0.1,
+        zfar = 1000,
+        fov = 90,
+        fovRad = degreeToRadian(fov)
+        aspect_ratio = h / w,
+        lamda_z = zfar / (zfar - znear);
+
+
+    // projection 
+    const project = (vtx) => {
+        const [x, y, z] = vtx;
+
+        return [
+            (x * aspect_ratio / Math.tan(fovRad / 2)) / z,
+            (y / Math.tan(fovRad / 2)) / z,
+            // z * lamda_z - (lamda_z * znear)
+        ]
+    };
+    
+    // ctx draw
+    const draw = (points) => {
+        c.beginPath();
+        for(const [x, y] of points) c.lineTo(x, y);
+        c.closePath();
+        c.stroke();
+    }
+
+    const translate = (mesh, position) => {
+        mesh.vertices = mesh.vertices.map(v => [v[0] + position[0], v[1] + position[1], v[2] + position[2]])
+        mesh.position = position;
+        return mesh;
+    }
+
+    const nds = (v) => ([v[0] * w + w / 2, v[1] * h + h / 2])
+
+    // render
+    const cubeMoved = translate(cube, [0, 0, 10]);
+    const vertices = cubeMoved.vertices.map(project).map(nds);
+    console.log(cubeMoved)
+    const faces = cubeMoved.faces.map(face => {
+        const t = [];
+
+        for(const pos of face) {
+            t.push(vertices[pos]);
+        }
+
+        return t;
+    })
+
+    for(const face of faces) {
+        draw(face);
+    }
+
+    const rotateX = (mesh, angle) => {
+        const rad = degreeToRadian(angle);
+        const sinA = Math.sin(rad), cosA = Math.cos(rad);
+
+        mesh.vertices = mesh.vertices.map(v => 
+            {
+                const y = v[1] - mesh.position[1];
+                const z = v[2] - mesh.position[2];
+
+                return [
+                    v[0],
+                    y * cosA - z * sinA + mesh.position[1],
+                    y * sinA + z * cosA + mesh.position[2]
+                ]
+            }
+        )
+
+        return mesh
+    }
+
+    const rotateY = (mesh, angle) => {
+        const rad = degreeToRadian(angle);
+        const sinA = Math.sin(rad), cosA = Math.cos(rad);
+
+        mesh.vertices = mesh.vertices.map(v => {
+            const x = v[0] - mesh.position[0];
+            const z = v[2] - mesh.position[2];
+
+            return [
+                x * cosA + z * sinA + mesh.position[0],
+                v[1],
+                -x * sinA + z * cosA + mesh.position[2]
+            ];
+        });
+
+        return mesh;
+    }
+
+
+    const rotateZ = (mesh, angle) => {
+        const rad = degreeToRadian(angle);
+        const sinA = Math.sin(rad), cosA = Math.cos(rad);
+
+        mesh.vertices = mesh.vertices.map(v => {
+            const x = v[0] - mesh.position[0];
+            const y = v[1] - mesh.position[1];
+
+            return [
+                x * cosA - y * sinA + mesh.position[0],
+                x * sinA + y * cosA + mesh.position[1],
+                v[2]
+            ];
+        });
+
+        return mesh;
+    }
+
+    let ry = 1;
+    setInterval(() => {
+        c.clearRect(0, 0, canvas.width, canvas.height);
+        let cubeRotated = cubeMoved;
+        cubeRotated = rotateX(cubeMoved, ry)
+        // cubeRotated = rotateY(cubeRotated, ry)
+        // // cubeRotated = rotateZ(cubeRotated, ry)
+        ry += 1;
+        if(ry == 360) ry = 1;
+
+        console.log(cubeRotated)
+
+        const rotatedVertices = cubeRotated.vertices.map(project).map(nds);
+
+        const f = cubeRotated.faces.map(face => {
+            const t = [];
+
+            for(const pos of face) {
+                t.push(rotatedVertices[pos]);
+            }
+
+            return t;
+        })
+
+        for(const face of f) {
+            draw(face);
+        } 
+
+    }, 1000 / 10);
+</script>
+</html>
