@@ -12,6 +12,7 @@ function setupCanvas(width = window.innerWidth, height = window.innerHeight) {
 const canvas = setupCanvas();
 const renderer = new Renderer(canvas);
 
+// console.log("hello")
 // const teapot = new Object3d();
 // teapot.loadFromObjFile('../teapot.obj')
 //     .then(() => {
@@ -25,10 +26,10 @@ cube.loadFromObjFile('./cube.obj')
         renderer.addObject(cube);
         renderer.start();
 
-        // setInterval(() => {
-        //     cube.rotation.x += 1;
-        //     cube.rotation.y += 0.7;
-        // }, 1000 / 60)
+        setInterval(() => {
+            cube.rotation.x += 1;
+            cube.rotation.y += 0.7;
+        }, 1000 / 60)
     })
 
     

@@ -192,7 +192,6 @@ class Renderer {
 
                     faces_to_draw.push(projected_face);
                 }
-                
 
                 // sort faces from back to front
                 faces_to_draw = faces_to_draw.sort((f1, f2) => {

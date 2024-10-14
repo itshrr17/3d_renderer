@@ -315,29 +315,25 @@ class Object3d {
     }
     
     parseContent(content) {
-        const lines = content.split('\r\n');
+        const lines = content.split('\n');
 
         const vertices = [];
         const faces = [];
-        const paths = [];
 
         for(const line of lines) {
             const line_chunks = line.split(' ');
             const v = new Vector(Number(line_chunks[1]), Number(line_chunks[2]), Number(line_chunks[3]));
-            
+
             if(line_chunks[0] == 'v') {
                 vertices.push(v);
             } else if(line_chunks[0] == 'f') {
                 faces.push([Number(line_chunks[1]), Number(line_chunks[2]), Number(line_chunks[3])]);
-            } else if(line_chunks[0] == 'l') {
-                paths.push([Number(line_chunks[1]), Number(line_chunks[2]), Number(line_chunks[3])])
             }
         }
 
         return {
             vertices,
-            faces,
-            paths
+            faces
         }
     }
 
@@ -346,6 +342,7 @@ class Object3d {
             const res = await fetch(path);
             const file = await res.text();
             const data = this.parseContent(file);
+            console.log(data)
             this.vertices = data.vertices;
             this.faces = data.faces;
         } catch(err) {
