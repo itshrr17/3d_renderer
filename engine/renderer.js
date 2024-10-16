@@ -20,8 +20,8 @@ class Renderer {
     
     ctx;
     canvas;
-    ref;
-    fps = 30;
+    req;
+    fps = 90;
     /**
      * @type {{
      *  objects: Object3d[],
@@ -41,11 +41,12 @@ class Renderer {
             position: new Vector(0, 2, -1),
         },
         camera: {
-            position: new Vector(0, 0, -10),
+            position: new Vector(0, 1, -10),
             lookAt: new Vector(0, 0, 1),
-            rotation: new Vector(0, 0.8, 0),
+            rotation: new Vector(0, 0, 0),
         },
     }
+    worldMatrix = new IdentityMatrix4x4();
 
     constructor(canvas, config = {}) {
         this.canvas = canvas;
@@ -61,6 +62,7 @@ class Renderer {
         this.fovRad = utils.toRad(this.fov);
 
         this.projectionMatrix = new ProjectionMatrix(this.fovRad, this.aspectRatio, this.znear, this.zfar);
+        window.scene = this.scene
     }
 
     addObject(object) {
@@ -109,7 +111,7 @@ class Renderer {
 
         const newRight = newUp.cross(forward);
 
-        // // right vector
+        // right vector
         // const right = up.cross(forward);
         // const newUp = forward.cross(right).normalize();
         
@@ -131,43 +133,44 @@ class Renderer {
         // clear screen
         this.ctx.clearRect(0, 0, this.width, this.height);
 
+        // calculate camera matrix
         const camera = this.scene.camera;
 
         const up = new Vector(0, 1, 0);
         let target = new Vector(0, 0, 1);
+        const cameraRotX = new RotationMatrixX(camera.rotation.x);
         const cameraRotY = new RotationMatrixY(camera.rotation.y);
-        camera.lookAt = cameraRotY.multiplyVector(target);
+
+
+        camera.lookAt = cameraRotX
+                        .multiply(cameraRotY)
+                        .multiplyVector(target);
         target = camera.position.add(camera.lookAt);
         const cameraMatrix = this.pointAt(camera.position, target, up); // cameraMatrix
 
         // viewMatrix
         const viewMatrix = cameraMatrix.quick_inverse();
 
+        let polygons = [];
+
         this.scene.objects.forEach(obj => {
-            const rotXMat = new RotationMatrixX(obj.rotation.x);
-            const rotYMat = new RotationMatrixY(obj.rotation.y);
-            const rotZMat = new RotationMatrixZ(obj.rotation.z);
-            const transMat = new TranslationMatrix(obj.position.x, obj.position.y, obj.position.z);
-
-            const worldMat = new IdentityMatrix4x4()
-                                .multiply(rotXMat)
-                                .multiply(rotYMat)
-                                .multiply(rotZMat)
-                                .multiply(transMat);
-
-            let faces_to_draw = [];
-
             obj.faces.forEach(face_config => {
+                // mapping and applying transformations
                 const face = face_config.map(idx => {
                     const vtx = obj.vertices[idx];
-                    return worldMat.multiplyVector(vtx);
+                    return this.worldMatrix
+                        .multiply(obj.rotationMatrix.x)
+                        .multiply(obj.rotationMatrix.y)
+                        .multiply(obj.rotationMatrix.z)
+                        .multiply(obj.translationMatrix)
+                        .multiplyVector(vtx);
                 })
-
+    
                 const lineA = face[1].subtract(face[0]);
                 const lineB = face[2].subtract(face[0]);
-
+    
                 const face_normal = lineA.cross(lineB).normalize();
-
+    
                 const cameraRay = face[0].subtract(camera.position);
                 // if camera ray is aligned with normal, triangle is visible
                 if(face_normal.dot(cameraRay) < 0) {
@@ -181,7 +184,7 @@ class Renderer {
                         v = v.multiplyVector(new Vector(0.5 * this.width, 0.5 * this.height, 1, 1));
                         return v;
                     })
-
+    
                     // setting light intensity
                     const light_direction = this.scene.light.position.normalize();
                     // measure alignment of face normal and light direction
@@ -189,36 +192,42 @@ class Renderer {
                     face.light_intensity = ((alignment + 1) / 2) * 230;
                     // set light intensity for this face
                     projected_face.light_intensity = ((alignment + 1) / 2) * 230; 
-
-                    faces_to_draw.push(projected_face);
+    
+                    polygons.push(projected_face);
                 }
+            })
+        })
 
-                // sort faces from back to front
-                faces_to_draw = faces_to_draw.sort((f1, f2) => {
-                    const az = (f1[0].z + f1[1].z + f1[2].z) / 3;
-                    const bz = (f2[0].z + f2[1].z + f2[2].z) / 3;
-                    return bz - az
-                })
+        // sort faces from back to front
+        polygons = polygons.sort((f1, f2) => {
+            const z1 = (f1[0].z + f1[1].z + f1[2].z) / 3;
+            const z2 = (f2[0].z + f2[1].z + f2[2].z) / 3;
+            return z1 - z2
+        })
 
-                // time to draw
-                faces_to_draw.forEach(face => {
-                    this.drawPolygon(face, {
-                        fillColor: `rgb(${face.light_intensity}, ${face.light_intensity}, ${face.light_intensity})`,
-                        strokeColor: `rgb(${face.light_intensity}, ${face.light_intensity}, ${face.light_intensity})`
-                    })
-                })
+        // time to draw
+        polygons.forEach(face => {
+            this.drawPolygon(face, {
+                fillColor: `rgb(${face.light_intensity}, ${face.light_intensity}, ${face.light_intensity})`,
+                strokeColor: `rgb(${face.light_intensity}, ${face.light_intensity}, ${face.light_intensity})`
             })
         })
     }
 
+    renderLoop = () => {
+        this.render();
+
+        setTimeout(() => {
+            this.req = requestAnimationFrame(this.renderLoop);
+        }, 1000 / this.fps);
+    };
+
     start() {
-        // this.render()
-        const fn = this.render.bind(this);
-        this.ref = setInterval(fn, 1000 / this.fps);
+        this.renderLoop();
     }
 
     stop() {
-        clearInterval(this.ref);
+        if(this.req) cancelAnimationFrame(this.req);
     }
 }
 

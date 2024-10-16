@@ -12,12 +12,16 @@ function setupCanvas(width = window.innerWidth, height = window.innerHeight) {
 const canvas = setupCanvas();
 const renderer = new Renderer(canvas);
 
-// console.log("hello")
 // const teapot = new Object3d();
 // teapot.loadFromObjFile('../teapot.obj')
-//     .then(() => {
+//     .then(() => {    
 //         renderer.addObject(teapot);
 //         renderer.start();
+
+//         setInterval(() => {
+//             // teapot.setRotation(teapot.rotation.x + 0.3, teapot.rotation.y + 1, undefined)
+//             // teapot.setPosition(undefined, undefined, teapot.position.z + 1)
+//         }, 1000 / 280)
 //     })
 
 const cube = new Object3d();
@@ -27,8 +31,7 @@ cube.loadFromObjFile('./cube.obj')
         renderer.start();
 
         setInterval(() => {
-            cube.rotation.x += 1;
-            cube.rotation.y += 0.7;
+            // cube.setRotation(cube.rotation.x + 1, cube.rotation.y + 0.7, undefined)
         }, 1000 / 60)
     })
 
@@ -81,6 +84,12 @@ document.addEventListener('keydown', (e) => {
             break;
         case 's':
             renderer.scene.camera.position = renderer.scene.camera.position.subtract(vForward);
+            break;
+        case 'q':
+            renderer.scene.camera.rotation.x -= 2;
+            break;
+        case 'e':
+            renderer.scene.camera.rotation.x += 2;
             break;
     }
 })

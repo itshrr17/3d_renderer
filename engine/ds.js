@@ -289,9 +289,17 @@ class Object3d {
     vertices = [];
     /** @type {[number[]]} faces */
     faces = [];
-    position = new Vector();
-    rotation = new Vector();
     scaling = 1;
+
+    position = new Vector();
+    translationMatrix = new TranslationMatrix(0, 0, 0);
+
+    rotation = new Vector();
+    rotationMatrix = {
+        x: new RotationMatrixX(0),
+        y: new RotationMatrixY(0),
+        z: new RotationMatrixZ(0),
+    };
 
     constructor(vertices, faces) {
         this.vertices = vertices;
@@ -299,15 +307,25 @@ class Object3d {
     }
 
     setPosition(x = undefined, y = undefined, z = undefined) {
-        this.position.x = x ?? this.position.x;
-        this.position.y = y ?? this.position.y;
-        this.position.z = z ?? this.position.z;
+        this.position.x = x ?? this.position.x,
+        this.position.y = y ?? this.position.y,
+        this.position.z = z ?? this.position.z
+
+        this.translationMatrix = new TranslationMatrix(
+            x ?? this.position.x,
+            y ?? this.position.y,
+            z ?? this.position.z
+        )
     }
 
     setRotation(x = undefined, y = undefined, z = undefined) {
-        this.rotation.x = x ?? this.rotation.x;
-        this.rotation.y = y ?? this.rotation.y;
-        this.rotation.z = z ?? this.rotation.z;
+        this.rotation.x = x ?? this.rotation.x,
+        this.rotation.y = y ?? this.rotation.y,
+        this.rotation.z = z ?? this.rotation.z
+
+        if(x != undefined) this.rotationMatrix.x = new RotationMatrixX(x);
+        if(y != undefined) this.rotationMatrix.y = new RotationMatrixY(y);
+        if(z != undefined) this.rotationMatrix.z = new RotationMatrixZ(z);
     }
 
     setScaling(s) {

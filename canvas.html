@@ -96,7 +96,7 @@
     // render
     const cubeMoved = translate(cube, [0, 0, 10]);
     const vertices = cubeMoved.vertices.map(project).map(nds);
-    console.log(cubeMoved)
+
     const faces = cubeMoved.faces.map(face => {
         const t = [];
 
