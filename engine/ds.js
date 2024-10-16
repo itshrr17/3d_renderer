@@ -327,7 +327,13 @@ class Object3d {
             if(line_chunks[0] == 'v') {
                 vertices.push(v);
             } else if(line_chunks[0] == 'f') {
-                faces.push([Number(line_chunks[1]), Number(line_chunks[2]), Number(line_chunks[3])]);
+                faces.push(
+                    [
+                        Number(line_chunks[1] - 1), // reducing once becauce vertices starts from 0 index
+                        Number(line_chunks[2] - 1),
+                        Number(line_chunks[3] - 1)
+                    ]
+                );
             }
         }
 
@@ -342,7 +348,6 @@ class Object3d {
             const res = await fetch(path);
             const file = await res.text();
             const data = this.parseContent(file);
-            console.log(data)
             this.vertices = data.vertices;
             this.faces = data.faces;
         } catch(err) {
