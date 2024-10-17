@@ -125,6 +125,13 @@ class Vector {
         return [this.x, this.y, this.z];
     }
 
+    negate() {
+        return new Vector(
+            -this.y,
+            -this.z,
+            -this.x
+        )
+    }
 }
 
 class Triangle {

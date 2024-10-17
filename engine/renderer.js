@@ -6,9 +6,7 @@ import {
     ProjectionMatrix,
     RotationMatrixX,
     RotationMatrixY,
-    RotationMatrixZ,
     Object3d,
-    TranslationMatrix
 } from './ds.js'
 import utils from './utils.js'
 
@@ -29,8 +27,9 @@ class Renderer {
      *      position: Vector
      *  },
      *  camera: {
+     *      up: Vector,
      *      position: Vector,
-     *      lookAt: Vector,
+     *      target: Vector,
      *      rotation: Vector,
      *  }
      * }} scene
@@ -41,9 +40,10 @@ class Renderer {
             position: new Vector(0, 2, -1),
         },
         camera: {
-            position: new Vector(0, 1, -10),
-            lookAt: new Vector(0, 0, 1),
+            up: new Vector(0, 1, 0),
+            position: new Vector(0, 5, -10),
             rotation: new Vector(0, 0, 0),
+            target: new Vector(0, 0, 0),
         },
     }
     worldMatrix = new IdentityMatrix4x4();
@@ -135,20 +135,26 @@ class Renderer {
 
         // calculate camera matrix
         const camera = this.scene.camera;
-
-        const up = new Vector(0, 1, 0);
-        let target = new Vector(0, 0, 1);
+        
+        // Calculate forward vector (direction from camera to target)
+        const forward = camera.target.subtract(camera.position).normalize();
+        
+        // Apply camera rotation to the forward vector
         const cameraRotX = new RotationMatrixX(camera.rotation.x);
         const cameraRotY = new RotationMatrixY(camera.rotation.y);
-
-
-        camera.lookAt = cameraRotX
-                        .multiply(cameraRotY)
-                        .multiplyVector(target);
-        target = camera.position.add(camera.lookAt);
-        const cameraMatrix = this.pointAt(camera.position, target, up); // cameraMatrix
-
-        // viewMatrix
+        
+        // Rotate the forward vector using the rotation matrices
+        const rotatedForward = cameraRotX
+                                .multiply(cameraRotY)
+                                .multiplyVector(forward);
+        
+        // Calculate the new target point the camera is looking at
+        const target = camera.position.add(rotatedForward);
+        
+        // Compute the camera matrix using a proper pointAt function (position, target, up vector)
+        const cameraMatrix = this.pointAt(camera.position, target, camera.up);
+        
+        // Invert the camera matrix to get the view matrix (quick_inverse is used for performance)
         const viewMatrix = cameraMatrix.quick_inverse();
 
         let polygons = [];
@@ -223,7 +229,7 @@ class Renderer {
     };
 
     start() {
-        this.renderLoop();
+        if(!this.req) this.renderLoop();
     }
 
     stop() {
