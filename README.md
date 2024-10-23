@@ -1,5 +1,8 @@
-3D renderer implementation on web
+# 3D Renderer - using perspective projection
 
-Purpose -  To understand how three dimensional objects are projected onto two dimensional screens.
+### Objective:
+To understand how three dimensional objects are projected onto two dimensional screens.
 
-Work in progress
+Check out here: [renderer](/3d_renderer/engine/page.html/)
+
+Currently work in progress...

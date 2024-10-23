@@ -80,35 +80,38 @@ document.addEventListener('mousemove', (e) =>  {
 
     const camera = renderer.scene.camera;
     const sensitivity = 0.01; // Adjust sensitivity to control rotation speed
-    // const minPitch = -Math.PI / 2 + 0.01;  // Limit for camera pitch to prevent flipping
-    // const maxPitch = Math.PI / 2 - 0.01;   // Limit for camera pitch to prevent flipping
     
     // Update camera rotation (phi = vertical, theta = horizontal)
     const phi = camera.rotation.x + (e.movementY * sensitivity);
-    const theta = camera.rotation.y //+ (e.movementX * sensitivity);
-    
+    const theta = camera.rotation.y + (e.movementX * sensitivity);
+
     // Save updated rotation back to camera object
     camera.rotation.x = phi;
     camera.rotation.y = theta;
-    
+
     const radius = camera.target.subtract(camera.position).length();
     
     // Calculate the new camera position based on the spherical coordinates
     const updatedCameraPosition = new Vector(
-        camera.target.x - radius * Math.cos(phi) * Math.sin(theta),
-        camera.target.y + radius * Math.sin(phi),
-        camera.target.z + radius * Math.cos(phi) * Math.cos(theta)
+        camera.target.x - radius * Math.cos(camera.rotation.x) * Math.sin(camera.rotation.y),
+        camera.target.y + radius * Math.sin(camera.rotation.x),
+        camera.target.z - radius * Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y)
     );
 
-    if (camera.rotation.x > Math.PI / 2) {
-        camera.up = new Vector(0, -1, 0);
+    const epsilon = 0.5; // Small threshold for floating-point comparison
+
+    // If phi is within 90 to 270 degrees (or π/2 to 3π/2 radians), camera is upside down
+    if (
+        (phi > Math.PI / 2 - epsilon && phi < (3 * Math.PI) / 2 + epsilon) ||
+        (phi < -Math.PI / 2 + epsilon && phi > -(3 * Math.PI) / 2 - epsilon)
+    ) {
+        camera.up = new Vector(0, -1, 0); // Invert "up" vector when upside down
     } else {
-        camera.up = new Vector(0, 1, 0);
+        camera.up = new Vector(0, 1, 0); // Default "up" vector when right-side up
     }
     
     // Update the camera's position to the new calculated position
     camera.position = updatedCameraPosition;
-
 })
 
 
