@@ -83,7 +83,7 @@ document.addEventListener('mousemove', (e) =>  {
     
     // Update camera rotation (phi = vertical, theta = horizontal)
     const phi = camera.rotation.x + (e.movementY * sensitivity);
-    const theta = camera.rotation.y + (e.movementX * sensitivity);
+    const theta = camera.rotation.y - (e.movementX * sensitivity);
 
     // Save updated rotation back to camera object
     camera.rotation.x = phi;
