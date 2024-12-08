@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perspective Projection</title>
     <script type="module" src="./index.js"></script>
+    <script type="module" src="./ui.js"></script>
 </head>
 <style>
     * {
@@ -19,6 +20,47 @@
         align-items: center;
         justify-content: center;
     }
+
+    .controls {
+        position: absolute;
+        top: 0.5em;
+        right: 0.5em;
+        background-color: rgb(224, 224, 224);
+        border-radius: 5px;
+
+        padding: 0.5em;
+        padding-left: 1.5em;
+        height: auto;
+        overflow: hidden;
+        transition: all 0.35s ease;
+    }
+
+    .toggle {
+        position: absolute;
+        display: flex;
+        top: 1.2em;
+        right: 1.2em;
+        z-index: 1;
+    }
+
+    .toggle:checked ~ .controls {
+        opacity: 1;
+    }
+
+    .toggle:not(:checked) ~ .controls {
+        opacity: 0;
+    }
 </style>
-<body></body>
+<body>
+    <input class="toggle" type="checkbox" checked/>
+    <ul class="controls">
+        <li>W / S       - Zoom In / Zoom Out</li>
+        <li>A / D       - Turn Left / Turn Right</li>
+        <li>Q / E       - Turn Up / Turn Down</li>
+        <li>Arrow L / R - Pan Left / Right</li>
+        <li>Arrow U / D - Pan Up / Down</li>
+        <li>Hold left mouse key and move to rotate object</li>
+        <!-- <li>Hold right mouse key orbit</li> -->
+    </ul>
+</body>
 </html>

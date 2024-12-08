@@ -150,10 +150,10 @@ document.addEventListener('keydown', (e) => {
             renderer.scene.camera.rotation.y += 2 * deltaTime;
             break;
         case 'q':
-            renderer.scene.camera.rotation.x -= 2;
+            renderer.scene.camera.rotation.x -= 2 * deltaTime;
             break;
         case 'e':
-            renderer.scene.camera.rotation.x += 2;
+            renderer.scene.camera.rotation.x += 2 * deltaTime;
             break;
     }
 })
