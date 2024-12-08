@@ -1,5 +1,5 @@
-import Renderer from "./renderer.js";
-import { Object3d, Vector } from "./ds.js";
+import Renderer from "./engine/renderer.js";
+import { Object3d, Vector } from "./engine/ds.js";
 
 function setupCanvas(width = window.innerWidth, height = window.innerHeight) {
     const canvas = document.createElement("canvas");
@@ -13,7 +13,7 @@ const canvas = setupCanvas();
 const renderer = new Renderer(canvas);
 
 // const teapot = new Object3d();
-// teapot.loadFromObjFile('../teapot.obj')
+// teapot.loadFromObjFile('../models/teapot.obj')
 //     .then(() => {    
 //         teapot.setPosition(0, -2, 0);
 
@@ -28,7 +28,7 @@ const renderer = new Renderer(canvas);
 //     })
 
 const cube = new Object3d();
-cube.loadFromObjFile('./cube.obj')
+cube.loadFromObjFile('../models/cube.obj')
     .then(() => {
         renderer.addObject(cube);
         renderer.start();
@@ -44,20 +44,6 @@ axis_x.loadFromObjFile('./axis_x.obj')
     renderer.addObject(axis_x);
     renderer.start();
 })
-
-// const axis_y = new Object3d();
-// axis_y.loadFromObjFile('./axis_y.obj')
-// .then(() => {
-//     renderer.addObject(axis_y);
-//     renderer.start();
-// })
-
-// const axis_z = new Object3d();
-// axis_z.loadFromObjFile('./axis_z.obj')
-// .then(() => {
-//     renderer.addObject(axis_z);
-//     renderer.start();
-// })
 
 let mousedown = false;
 

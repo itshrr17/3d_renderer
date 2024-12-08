@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perspective Projection</title>
+    <title>Basic Implementation 1 - Perspective Projection</title>
 </head>
 <style>
     * {
@@ -90,7 +90,7 @@
         return mesh;
     }
 
-    const nds = (vtx) => ([vtx[0] * w + w / 2, vtx[1] * h + h / 2])
+    const nds = (v) => ([v[0] * w + w / 2, v[1] * h + h / 2])
 
     // render
     const cubeMoved = translate(cube, [0, 0, 10]);

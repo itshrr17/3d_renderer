@@ -9,6 +9,8 @@ Currently work in progress...
 
 Issues:
 Orbiting - orientation flips
+
+Fixed:
 horizontal panning
 
 To be added:
