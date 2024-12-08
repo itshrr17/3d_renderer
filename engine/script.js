@@ -12,38 +12,38 @@ function setupCanvas(width = window.innerWidth, height = window.innerHeight) {
 const canvas = setupCanvas();
 const renderer = new Renderer(canvas);
 
-const teapot = new Object3d();
-teapot.loadFromObjFile('../teapot.obj')
-    .then(() => {    
-        teapot.setPosition(0, -2, 0);
+// const teapot = new Object3d();
+// teapot.loadFromObjFile('../teapot.obj')
+//     .then(() => {    
+//         teapot.setPosition(0, -2, 0);
 
-        renderer.addObject(teapot);
-        renderer.start();
-
-
-        setInterval(() => {
-            // teapot.setRotation(teapot.rotation.x + 0.3, teapot.rotation.y + 1, undefined)
-            // teapot.setPosition(undefined, undefined, teapot.position.z + 1)
-        }, 1000 / 280)
-    })
-
-// const cube = new Object3d();
-// cube.loadFromObjFile('./cube.obj')
-//     .then(() => {
-//         renderer.addObject(cube);
+//         renderer.addObject(teapot);
 //         renderer.start();
 
+
 //         setInterval(() => {
-//             // cube.setRotation(cube.rotation.x + 1, cube.rotation.y + 0.7, undefined)
-//         }, 1000 / 60)
+//             // teapot.setRotation(teapot.rotation.x + 0.3, teapot.rotation.y + 1, undefined)
+//             // teapot.setPosition(undefined, undefined, teapot.position.z + 1)
+//         }, 1000 / 280)
 //     })
 
-// const axis_x = new Object3d();
-// axis_x.loadFromObjFile('./axis_x.obj')
-// .then(() => {
-//     renderer.addObject(axis_x);
-//     renderer.start();
-// })
+const cube = new Object3d();
+cube.loadFromObjFile('./cube.obj')
+    .then(() => {
+        renderer.addObject(cube);
+        renderer.start();
+
+        setInterval(() => {
+            // cube.setRotation(cube.rotation.x + 1, cube.rotation.y + 0.7, undefined)
+        }, 1000 / 60)
+    })
+
+const axis_x = new Object3d();
+axis_x.loadFromObjFile('./axis_x.obj')
+.then(() => {
+    renderer.addObject(axis_x);
+    renderer.start();
+})
 
 // const axis_y = new Object3d();
 // axis_y.loadFromObjFile('./axis_y.obj')
@@ -61,10 +61,7 @@ teapot.loadFromObjFile('../teapot.obj')
 
 let mousedown = false;
 
-
-
 document.addEventListener('mousedown', (e) => {
-    console.log(e.button)
     mousedown = true;
 })
 
@@ -114,21 +111,31 @@ document.addEventListener('mousemove', (e) =>  {
     camera.position = updatedCameraPosition;
 })
 
+let lastTime = 0;
+
+document.addEventListener('keyup', (e, k) => {
+    lastTime = 0;
+})
 
 document.addEventListener('keydown', (e) => {
-    const camera = renderer.scene.camera;
-    const vForward = camera.target.subtract(camera.position).normalize();
+    // for smooth controls, using timeElapsed
+    const t = Date.now();
+    if(!lastTime) lastTime = t;
+    const deltaTime = ((t - lastTime) / 1000) || 0.2;
 
-    const vRight = vForward.cross(camera.up).scale(0.1);
+    const camera = renderer.scene.camera;
+    const vForward = camera.target.subtract(camera.position).normalize().multiply(0.5 * deltaTime);
+
+    const vRight = vForward.cross(camera.up).scale(0.5 * deltaTime);
 
     switch(e.key) {
         case 'ArrowUp':
-            renderer.scene.camera.position.y += 0.1;
-            renderer.scene.camera.target.y += 0.1;
+            renderer.scene.camera.position.y += 0.3 * deltaTime;
+            renderer.scene.camera.target.y += 0.3 * deltaTime;
             break;
         case 'ArrowDown':
-            renderer.scene.camera.position.y -= 0.1;
-            renderer.scene.camera.target.y -= 0.1;
+            renderer.scene.camera.position.y -= 0.3 * deltaTime;
+            renderer.scene.camera.target.y -= 0.3 * deltaTime;
             break;
         case 'ArrowLeft':
             renderer.scene.camera.position = renderer.scene.camera.position.subtract(vRight);
@@ -151,10 +158,10 @@ document.addEventListener('keydown', (e) => {
             renderer.scene.camera.position = renderer.scene.camera.position.subtract(vForward);
             break;
         case 'a':
-            renderer.scene.camera.rotation.y -= 2;
+            renderer.scene.camera.rotation.y -= 2 * deltaTime;
             break;
         case 'd':
-            renderer.scene.camera.rotation.y += 2;
+            renderer.scene.camera.rotation.y += 2 * deltaTime;
             break;
         case 'q':
             renderer.scene.camera.rotation.x -= 2;

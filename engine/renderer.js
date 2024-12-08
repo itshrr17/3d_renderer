@@ -41,12 +41,14 @@ class Renderer {
         },
         camera: {
             up: new Vector(0, 1, 0),
-            position: new Vector(0, 5, -10),
+            position: new Vector(0, 2, -10),
             rotation: new Vector(0, 0, 0),
             target: new Vector(0, 0, 0),
         },
     }
     worldMatrix = new IdentityMatrix4x4();
+    lastTime = 0;
+    deltaTime = 0;
 
     constructor(canvas, config = {}) {
         this.canvas = canvas;
@@ -129,7 +131,10 @@ class Renderer {
         return mat;
     }
 
-    render() {
+    render(timeElapsed) {
+        this.deltaTime = (timeElapsed - this.lastTime) / 1000;
+        this.lastTime = timeElapsed;
+
         // clear screen
         this.ctx.clearRect(0, 0, this.width, this.height);
 
@@ -220,8 +225,8 @@ class Renderer {
         })
     }
 
-    renderLoop = () => {
-        this.render();
+    renderLoop = (timeElapsed) => {
+        this.render(timeElapsed);
 
         setTimeout(() => {
             this.req = requestAnimationFrame(this.renderLoop);
