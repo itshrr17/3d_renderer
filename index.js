@@ -1,6 +1,21 @@
 import Renderer from "./engine/renderer.js";
 import { Object3d, Vector } from "./engine/ds.js";
 
+function isLocalHost() {
+    return location.hostname === "localhost" || location.hostname === "127.0.0.1"
+}
+
+const urls = {
+    local: {
+        cube: "../models/cube.obj",
+        teapot: "../models/teapot.obj"
+    },
+    git: {
+        cube: "../3d_renderer/models/cube.obj",
+        teapot: "../3d_renderer/models/teapot.obj"
+    }
+}
+
 function setupCanvas(width = window.innerWidth, height = window.innerHeight) {
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -43,7 +58,7 @@ function ui_add_object(object, checked = true) {
 
 
 const teapot = new Object3d();
-teapot.loadFromObjFile('../models/teapot.obj')
+teapot.loadFromObjFile(isLocalHost() ? urls.local.teapot : urls.git.teapot)
     .then(() => {    
         teapot.setPosition(0, -2, 0);
 
@@ -53,13 +68,12 @@ teapot.loadFromObjFile('../models/teapot.obj')
         ui_add_object(teapot);
 
         setInterval(() => {
-            // teapot.setRotation(teapot.rotation.x + 0.3, teapot.rotation.y + 1, undefined)
-            // teapot.setPosition(undefined, undefined, teapot.position.z + 1)
+            teapot.setRotation(undefined, teapot.rotation.y + 1, undefined)
         }, 1000 / 280)
     })
 
 const cube = new Object3d();
-cube.loadFromObjFile('../models/cube.obj')
+cube.loadFromObjFile(isLocalHost() ? urls.local.cube : urls.git.cube)
     .then(() => {
         // renderer.addObject(cube);
         // renderer.start();
