@@ -67,6 +67,10 @@ class Renderer {
         window.scene = this.scene
     }
 
+    hasObject(object) {
+        return this.scene.objects.includes(object)
+    }
+
     addObject(object) {
         this.scene.objects.push(object);
     }

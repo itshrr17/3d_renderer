@@ -4,62 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perspective Projection</title>
+    <link rel="stylesheet" href="./index.css"/>
     <script type="module" src="./index.js"></script>
     <script type="module" src="./ui.js"></script>
 </head>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-    }
-    
-    html, body {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .controls {
-        position: absolute;
-        top: 0.5em;
-        right: 0.5em;
-        background-color: rgb(224, 224, 224);
-        border-radius: 5px;
-
-        padding: 0.5em;
-        padding-left: 1.5em;
-        height: auto;
-        overflow: hidden;
-        transition: all 0.35s ease;
-    }
-
-    .toggle {
-        position: absolute;
-        display: flex;
-        top: 1.2em;
-        right: 1.2em;
-        z-index: 1;
-    }
-
-    .toggle:checked ~ .controls {
-        opacity: 1;
-    }
-
-    .toggle:not(:checked) ~ .controls {
-        opacity: 0;
-    }
-</style>
 <body>
-    <input class="toggle" type="checkbox" checked/>
-    <ul class="controls">
-        <li>W / S       - Zoom In / Zoom Out</li>
-        <li>A / D       - Turn Left / Turn Right</li>
-        <li>Q / E       - Turn Up / Turn Down</li>
-        <li>Arrow L / R - Pan Left / Right</li>
-        <li>Arrow U / D - Pan Up / Down</li>
-        <li>Hold left mouse key and move to rotate object</li>
+    <!-- menu -->
+    <!-- <ul id="menu">
+        <input id="upload-obj" type="file" accept=".obj" style="display: none;"></input>
+        <li><label for="upload-obj" style="cursor: pointer;">Load model (.obj)</label></li>
+    </ul> -->
+
+    <div id="models-list"></div>
+
+    <!-- shortcuts -->
+    <input id="help-toggle" type="checkbox" checked/>
+    <ul id="shortcuts">
+        <li><span class="key_btn">W</span> / <span class="key_btn">S</span>       - Zoom In / Zoom Out</li>
+        <li><span class="key_btn">A</span> / <span class="key_btn">D</span>       - Turn Left / Turn Right</li>
+        <li><span class="key_btn">Q</span> / <span class="key_btn">E</span>       - Turn Up / Turn Down</li>
+        <li>Arrow <span class="key_btn">L</span> / <span class="key_btn">R</span> - Pan Left / Right</li>
+        <li>Arrow <span class="key_btn">U</span> / <span class="key_btn">D</span> - Pan Up / Down</li>
+        <li>Hold and move left mouse key to rotate object</li>
         <!-- <li>Hold right mouse key orbit</li> -->
     </ul>
 </body>

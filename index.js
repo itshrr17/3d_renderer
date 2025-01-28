@@ -12,38 +12,64 @@ function setupCanvas(width = window.innerWidth, height = window.innerHeight) {
 const canvas = setupCanvas();
 const renderer = new Renderer(canvas);
 
-// const teapot = new Object3d();
-// teapot.loadFromObjFile('../models/teapot.obj')
-//     .then(() => {    
-//         teapot.setPosition(0, -2, 0);
+function ui_toggle_object(object, ele, e) {
+    if(renderer.hasObject(object)) {
+        renderer.removeObject(object);
+        ele.checked = false;
+    } else {
+        renderer.addObject(object);
+        ele.checked = true;
+    }
+}
 
-//         renderer.addObject(teapot);
-//         renderer.start();
+function ui_add_object(object, checked = true) {
+    const name = object.name;
+    const list = document.getElementById('models-list');
+    
+    const checkbox = document.createElement("input")
+    checkbox.type = "checkbox";
+    checkbox.checked = checked;
+    checkbox.name = name;
+    const text = document.createElement("span");
+    text.innerText = name
+
+    const div = document.createElement("div");
+    div.appendChild(checkbox)
+    div.appendChild(text);
+
+    list.appendChild(div);
+    div.onclick = (e) => ui_toggle_object(object, checkbox, e);
+}
 
 
-//         setInterval(() => {
-//             // teapot.setRotation(teapot.rotation.x + 0.3, teapot.rotation.y + 1, undefined)
-//             // teapot.setPosition(undefined, undefined, teapot.position.z + 1)
-//         }, 1000 / 280)
-//     })
+const teapot = new Object3d();
+teapot.loadFromObjFile('../models/teapot.obj')
+    .then(() => {    
+        teapot.setPosition(0, -2, 0);
+
+        renderer.addObject(teapot);
+        renderer.start();
+
+        ui_add_object(teapot);
+
+        setInterval(() => {
+            // teapot.setRotation(teapot.rotation.x + 0.3, teapot.rotation.y + 1, undefined)
+            // teapot.setPosition(undefined, undefined, teapot.position.z + 1)
+        }, 1000 / 280)
+    })
 
 const cube = new Object3d();
 cube.loadFromObjFile('../models/cube.obj')
     .then(() => {
-        renderer.addObject(cube);
-        renderer.start();
+        // renderer.addObject(cube);
+        // renderer.start();
+
+        ui_add_object(cube, false);
 
         setInterval(() => {
             // cube.setRotation(cube.rotation.x + 1, cube.rotation.y + 0.7, undefined)
         }, 1000 / 60)
     })
-
-const axis_x = new Object3d();
-axis_x.loadFromObjFile('./axis_x.obj')
-.then(() => {
-    renderer.addObject(axis_x);
-    renderer.start();
-})
 
 let mousedown = false;
 
@@ -52,7 +78,6 @@ document.addEventListener('mousedown', (e) => {
 })
 
 document.addEventListener('mouseup', (e) => {
-    console.log(e)
     mousedown = false;
 })
 

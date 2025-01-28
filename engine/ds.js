@@ -292,6 +292,7 @@ class ProjectionMatrix extends Matrix4x4 {
 }
 
 class Object3d {
+    name;
     /** @type {Vector[]} vertices */
     vertices = [];
     /** @type {[number[]]} faces */
@@ -375,6 +376,8 @@ class Object3d {
             const data = this.parseContent(file);
             this.vertices = data.vertices;
             this.faces = data.faces;
+            const arr = path.split('/');
+            this.name = arr[arr.length - 1]
         } catch(err) {
             console.log(err);
         }

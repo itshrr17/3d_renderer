@@ -3,16 +3,14 @@
 ### Objective:
 To understand how three dimensional objects are projected onto two dimensional screens.
 
-Check out here: [renderer](https://itshrr17.github.io/3d_renderer/engine/page.html)
+Check out here: [renderer](https://itshrr17.github.io/3d_renderer/index.html)
 
 Currently work in progress...
 
-Issues:
-Orbiting - orientation flips
+Issues:\
+Orbiting - orientation flips\
+~~horizontal panning~~
 
-Fixed:
-horizontal panning
-
-To be added:
-User interface
-Model loader
+To be added:\
+Model loader\
+~~User interface~~
