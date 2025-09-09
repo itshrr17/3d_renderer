@@ -8,7 +8,7 @@ Check out here: [renderer](https://itshrr17.github.io/3d_renderer/index.html)
 Currently work in progress...
 
 Issues:\
-Orbiting - orientation flips\
+~~Orbiting - orientation flips~~
 ~~horizontal panning~~
 
 To be added:\
