@@ -67,9 +67,9 @@ teapot.loadFromObjFile(isLocalHost() ? urls.local.teapot : urls.git.teapot)
 
         ui_add_object(teapot);
 
-        setInterval(() => {
-            teapot.setRotation(undefined, teapot.rotation.y + 1, undefined)
-        }, 1000 / 280)
+        // setInterval(() => {
+        //     teapot.setRotation(undefined, teapot.rotation.y + 1, undefined)
+        // }, 1000 / 280)
     })
 
 const cube = new Object3d();
