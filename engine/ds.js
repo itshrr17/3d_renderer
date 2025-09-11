@@ -8,6 +8,10 @@ class Vector {
         this.w = w
     }
 
+    /**
+     * lenght of vector from origin (0,0,0)
+     * @returns {number}
+     */
     length() {
         return Math.sqrt(
             this.x * this.x +
@@ -16,6 +20,10 @@ class Vector {
         );
     }
 
+    /**
+     *  Normalize vector, give direction with length of 1
+     * @returns {Vector}
+     */
     normalize() {
         const l = this.length();
         return new Vector(
@@ -74,7 +82,7 @@ class Vector {
     }
 
     /**
-     * Divide vector
+     * Divide vector, avoid k=0
      * @param {number} k
      */
     divide(k) {
@@ -86,7 +94,7 @@ class Vector {
     }
     
     /**
-     * Scale vector
+     * Scale vector, avoid k=0
      * @param {Vector} v 
      */
     scale(x, y, z) {
@@ -98,7 +106,7 @@ class Vector {
     }
 
     /**
-     * Dot Product
+     * Dot Product, does two vectors point in the same direction, 0-90 degs same direction, 90 = perpendicular, < 0 or > 90 degs opposite direction
      * @param {Vector} v 
      */
     dot(v) {
@@ -110,7 +118,7 @@ class Vector {
     }
 
     /**
-     * Cross Product
+     * Cross Product, gives a vector perpendicular to the two input vectors
      * @param {Vector} v 
      */
     cross(v) {
@@ -153,6 +161,7 @@ class Matrix4x4 {
     }
 
     /**
+     * Multiply vector, return new vector
      * @param {Vector} v 
      */
     multiplyVector(v) {
@@ -165,18 +174,11 @@ class Matrix4x4 {
     }
 
     /**
+     * Multiply matrix, return new matrix
      * @param {Matrix4x4} m 
      */
     multiply(m) {
         const new_m = new Matrix4x4();
-
-        // for (int c = 0; c < 4; c++)
-		// 	for (int r = 0; r < 4; r++)
-		// 		matrix.m[r][c] = m1.m[r][0] * m2.m[0][c] +
-        //                       m1.m[r][1] * m2.m[1][c] +
-        //                       m1.m[r][2] * m2.m[2][c] +
-        //                       m1.m[r][3] * m2.m[3][c];
-		// return matrix;
 
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
@@ -194,16 +196,20 @@ class Matrix4x4 {
 
     /**
      * Only for Rotation/Translation Matrices
+     * @return {Matrix4x4}
      */
     quick_inverse() {
         const newMat = new Matrix4x4();
-
+        
+        // Transpose rotation part, transposing the top-left 3×3 rotation matrix
         newMat.m[0][0] = this.m[0][0]; newMat.m[0][1] = this.m[1][0]; newMat.m[0][2] = this.m[2][0]; newMat.m[0][3] = 0;
 		newMat.m[1][0] = this.m[0][1]; newMat.m[1][1] = this.m[1][1]; newMat.m[1][2] = this.m[2][1]; newMat.m[1][3] = 0;
 		newMat.m[2][0] = this.m[0][2]; newMat.m[2][1] = this.m[1][2]; newMat.m[2][2] = this.m[2][2]; newMat.m[2][3] = 0;
+        // Invert translation
 		newMat.m[3][0] = -(this.m[3][0] * newMat.m[0][0] + this.m[3][1] * newMat.m[1][0] + this.m[3][2] * newMat.m[2][0]);
 		newMat.m[3][1] = -(this.m[3][0] * newMat.m[0][1] + this.m[3][1] * newMat.m[1][1] + this.m[3][2] * newMat.m[2][1]);
 		newMat.m[3][2] = -(this.m[3][0] * newMat.m[0][2] + this.m[3][1] * newMat.m[1][2] + this.m[3][2] * newMat.m[2][2]);
+        // homogeneous coordinate intact
 		newMat.m[3][3] = 1;
 
         return newMat;
