@@ -21,24 +21,26 @@
 <body>
 </body>
 <script defer>
-    // canvas setup
+    // === BASIC 3D RENDERER: PERSPECTIVE PROJECTION WITH ROTATION ===
+
+    // 1. Create a canvas and get its 2D drawing context
     const canvas = document.createElement("canvas");
     canvas.width = window.innerWidth - 20;
     canvas.height = window.innerHeight - 20;
     document.body.append(canvas);
     const c = canvas.getContext("2d");
 
-    // 3d cube data, local space
+    // 2. Define a cube in 3D space (8 vertices, 6 faces)
     const cube = {
         vertices: [
-            [-1, 1, -1],
-            [-1, -1, -1],
-            [1, 1, -1],
-            [1, -1, -1],
-            [-1, 1, 1],
-            [-1, -1, 1],
-            [1, 1, 1],
-            [1, -1, 1]
+            [-1, 1, -1],   // 0: top-left-front
+            [-1, -1, -1],  // 1: bottom-left-front
+            [1, 1, -1],    // 2: top-right-front
+            [1, -1, -1],   // 3: bottom-right-front
+            [-1, 1, 1],    // 4: top-left-back
+            [-1, -1, 1],   // 5: bottom-left-back
+            [1, 1, 1],     // 6: top-right-back
+            [1, -1, 1]     // 7: bottom-right-back
         ],
         faces: [
             [0, 1, 3, 2, 0], // front face
@@ -52,32 +54,32 @@
         scale: 1,
     }
 
-    // utility
+    // 3. Utility: convert degrees to radians
     const degreeToRadian = (angle) => (angle / 180) * Math.PI;
 
-    // space setup
-    let w = canvas.width,
-        h = canvas.height,
-        znear = 0.1,
-        zfar = 1000,
-        fov = 90,
-        fovRad = degreeToRadian(fov)
+    // 4. Set up camera and projection parameters
+    let w = canvas.width,   // screen width
+        h = canvas.height,  // screen height
+        znear = 0.1,        // near clipping plane
+        zfar = 1000,        // far clipping plane
+        fov = 90,           // field of view (degrees)
+        fovRad = degreeToRadian(fov),
         aspect_ratio = h / w,
         lamda_z = zfar / (zfar - znear);
 
-
-    // projection 
+    // 5. Perspective projection math
+    // This function projects a 3D vertex to 2D screen space
+    // The farther z is, the smaller x/y become (perspective effect)
     const project = (vtx) => {
         const [x, y, z] = vtx;
-
         return [
             (x * aspect_ratio / Math.tan(fovRad / 2)) / z,
             (y / Math.tan(fovRad / 2)) / z,
-            // z * lamda_z - (lamda_z * znear)
+            // z * lamda_z - (lamda_z * znear) // (not used for drawing)
         ]
     };
-    
-    // ctx draw
+
+    // 6. Draw a polygon (face) given a list of 2D points
     const draw = (points) => {
         c.beginPath();
         for(const [x, y] of points) c.lineTo(x, y);
@@ -85,115 +87,101 @@
         c.stroke();
     }
 
+    // 7. Move (translate) the cube in 3D space
+    // Here, we move it 10 units away from the camera (z = 10)
     const translate = (mesh, position) => {
         mesh.vertices = mesh.vertices.map(v => [v[0] + position[0], v[1] + position[1], v[2] + position[2]])
         mesh.position = position;
         return mesh;
     }
 
+    // 8. Convert normalized device coordinates [-1,1] to screen pixels
+    // This centers the drawing on the canvas
     const nds = (v) => ([(v[0] + 1) * w / 2, (v[1] + 1) * h / 2])
 
-    // render
+    // === RENDERING (initial static cube) ===
     const cubeMoved = translate(cube, [0, 0, 10]);
     const vertices = cubeMoved.vertices.map(project).map(nds);
-
     const faces = cubeMoved.faces.map(face => {
         const t = [];
-
         for(const pos of face) {
             t.push(vertices[pos]);
         }
-
         return t;
     })
-
     for(const face of faces) {
         draw(face);
     }
 
+    // === ROTATION FUNCTIONS ===
+    // These rotate the cube around X, Y, or Z axis
+    // Each function updates the vertices in place
     const rotateX = (mesh, angle) => {
         const rad = degreeToRadian(angle);
         const sinA = Math.sin(rad), cosA = Math.cos(rad);
-
-        mesh.vertices = mesh.vertices.map(v => 
-            {
-                const y = v[1] - mesh.position[1];
-                const z = v[2] - mesh.position[2];
-
-                return [
-                    v[0],
-                    y * cosA - z * sinA + mesh.position[1],
-                    y * sinA + z * cosA + mesh.position[2]
-                ]
-            }
-        )
-
-        return mesh
+        mesh.vertices = mesh.vertices.map(v => {
+            const y = v[1] - mesh.position[1];
+            const z = v[2] - mesh.position[2];
+            return [
+                v[0],
+                y * cosA - z * sinA + mesh.position[1],
+                y * sinA + z * cosA + mesh.position[2]
+            ]
+        });
+        return mesh;
     }
-
     const rotateY = (mesh, angle) => {
         const rad = degreeToRadian(angle);
         const sinA = Math.sin(rad), cosA = Math.cos(rad);
-
         mesh.vertices = mesh.vertices.map(v => {
             const x = v[0] - mesh.position[0];
             const z = v[2] - mesh.position[2];
-
             return [
                 x * cosA + z * sinA + mesh.position[0],
                 v[1],
                 -x * sinA + z * cosA + mesh.position[2]
             ];
         });
-
         return mesh;
     }
-
-
     const rotateZ = (mesh, angle) => {
         const rad = degreeToRadian(angle);
         const sinA = Math.sin(rad), cosA = Math.cos(rad);
-
         mesh.vertices = mesh.vertices.map(v => {
             const x = v[0] - mesh.position[0];
             const y = v[1] - mesh.position[1];
-
             return [
                 x * cosA - y * sinA + mesh.position[0],
                 x * sinA + y * cosA + mesh.position[1],
                 v[2]
             ];
         });
-
         return mesh;
     }
 
+    // === ANIMATION LOOP: ROTATE AND DRAW ===
+    // This will rotate the cube around the X axis and redraw it every frame
     let ry = 1;
     setInterval(() => {
         c.clearRect(0, 0, canvas.width, canvas.height);
         let cubeRotated = cubeMoved;
-        cubeRotated = rotateX(cubeMoved, ry)
+        cubeRotated = rotateX(cubeMoved, ry); // Try rotateY or rotateZ for other axes
         // cubeRotated = rotateY(cubeRotated, ry)
-        // // cubeRotated = rotateZ(cubeRotated, ry)
+        // cubeRotated = rotateZ(cubeRotated, ry)
         ry += 1;
         if(ry == 360) ry = 1;
-
+        // Project and draw the rotated cube
         const rotatedVertices = cubeRotated.vertices.map(project).map(nds);
-
         const f = cubeRotated.faces.map(face => {
             const t = [];
-
             for(const pos of face) {
                 t.push(rotatedVertices[pos]);
             }
-
             return t;
         })
-
         for(const face of f) {
             draw(face);
         } 
-
     }, 1000 / 10);
 </script>
 </html>

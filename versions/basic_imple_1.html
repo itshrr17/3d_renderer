@@ -21,25 +21,29 @@
 <body>
 </body>
 <script defer>
-    // canvas setup
+    // === BASIC 3D RENDERER: PERSPECTIVE PROJECTION DEMO ===
+
+    // 1. Create a canvas and get its 2D drawing context
     const canvas = document.createElement("canvas");
     canvas.width = window.innerWidth - 20;
     canvas.height = window.innerHeight - 20;
     document.body.append(canvas);
     const c = canvas.getContext("2d");
 
-    // 3d cube data, local space
+    // 2. Define a cube in 3D space (8 vertices, 6 faces)
+    // Each vertex is [x, y, z]
     const cube = {
         vertices: [
-            [-1, 1, -1],
-            [-1, -1, -1],
-            [1, 1, -1],
-            [1, -1, -1],
-            [-1, 1, 1],
-            [-1, -1, 1],
-            [1, 1, 1],
-            [1, -1, 1]
+            [-1, 1, -1],   // 0: top-left-front
+            [-1, -1, -1],  // 1: bottom-left-front
+            [1, 1, -1],    // 2: top-right-front
+            [1, -1, -1],   // 3: bottom-right-front
+            [-1, 1, 1],    // 4: top-left-back
+            [-1, -1, 1],   // 5: bottom-left-back
+            [1, 1, 1],     // 6: top-right-back
+            [1, -1, 1]     // 7: bottom-right-back
         ],
+        // Each face is a list of vertex indices (closed loop)
         faces: [
             [0, 1, 3, 2, 0], // front face
             [4, 5, 7, 6, 4], // back face
@@ -52,31 +56,33 @@
         scale: 1,
     }
 
-    // space setup
-    let w = canvas.width,
-        h = canvas.height,
-        znear = 1,
-        zfar = 1000,
-        fov = 45, // degrees
-        // aspect_ratio = h / w,
-        lamda_z = zfar / (zfar - znear);
+    // 3. Set up camera and projection parameters
+    let w = canvas.width,   // screen width
+        h = canvas.height,  // screen height
+        znear = 1,          // near clipping plane
+        zfar = 1000,        // far clipping plane
+        fov = 45,           // field of view (degrees)
+        lamda_z = zfar / (zfar - znear); // for depth (not used in drawing here)
 
-    // utility
+    // 4. Utility: convert degrees to radians
     const degreeToRadian = (angle) => (angle / 180) * Math.PI;
 
-    // projection 
-    // const transform = (xy, z) => xy / Math.tan(degreeToRadian(fov) / 2);
+    // 5. Perspective projection math
+    // This function projects a 3D x/y coordinate to 2D, simulating perspective
+    // The farther z is, the smaller x/y become (things get smaller as they go away)
     const transform = (xy, z) => (xy) / z * Math.tan(degreeToRadian(fov) / 2);
 
+    // 6. Project a 3D vertex to 2D screen space
     const project = (vertex) => {
+        // vertex[0] = x, vertex[1] = y, vertex[2] = z
         const x = transform(vertex[0], vertex[2]);
         const y = transform(vertex[1], vertex[2]);
+        // z is not used for drawing, but could be used for depth
         const z = lamda_z * -vertex[2] * znear;
-        
         return [x, y, z];
     };
-    
-    // ctx draw
+
+    // 7. Draw a polygon (face) given a list of 2D points
     const draw = (points) => {
         c.beginPath();
         for(const [x, y] of points) c.lineTo(x, y);
@@ -84,27 +90,32 @@
         c.stroke();
     }
 
+    // 8. Move (translate) the cube in 3D space
+    // Here, we move it 10 units away from the camera (z = 10)
     const translate = (mesh, position) => {
         mesh.vertices = mesh.vertices.map(v => [v[0] + position[0], v[1] + position[1], v[2] + position[2]])
         mesh.position = position;
         return mesh;
     }
 
+    // 9. Convert normalized device coordinates [-1,1] to screen pixels
+    // This centers the drawing on the canvas
     const nds = (v) => ([v[0] * w + w / 2, v[1] * h + h / 2])
 
-    // render
+    // === RENDERING ===
+    // Move the cube away from the camera so it's visible
     const cubeMoved = translate(cube, [0, 0, 10]);
+    // Project all vertices to 2D, then convert to screen coordinates
     const vertices = cubeMoved.vertices.map(project).map(nds);
+    // For each face, get the 2D points for its vertices
     const faces = cubeMoved.faces.map(face => {
         const t = [];
-
         for(const pos of face) {
             t.push(vertices[pos]);
         }
-
         return t;
     })
-
+    // Draw each face as a polygon
     for(const face of faces) {
         draw(face);
     }
